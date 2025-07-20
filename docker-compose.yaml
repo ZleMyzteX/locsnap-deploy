@@ -1,0 +1,92 @@
+services:
+  traefik:
+    image: traefik:v2.11
+    container_name: traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+    networks:
+      - traefik-network
+
+  locsnap-backend:
+    image: zlemyztex/locsnap-backend
+    container_name: locsnap-backend
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+      - traefik-network
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - database
+
+  locsnap-frontend:
+    image: zlemyztex/locsnap-frontend
+    container_name: locsnap-frontend
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+      - traefik-network
+    depends_on:
+      - locsnap-backend
+
+  database:
+    image: postgres:16.9
+    container_name: database
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: locsnap
+      POSTGRES_PASSWORD: totally-secure-password
+      POSTGRES_DB: locsnap_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - monitoring-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=200h"
+      - "--web.enable-lifecycle"
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - monitoring-network
+      - traefik-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    networks:
+      - monitoring-network
+      - traefik-network
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+networks:
+  monitoring-network:
+    driver: bridge
+  traefik-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
