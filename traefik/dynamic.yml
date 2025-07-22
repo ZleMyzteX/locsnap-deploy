@@ -1,22 +1,59 @@
 http:
+  middlewares:
+    redirect-to-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
   routers:
-    frontend:
-      rule: "PathPrefix(`/`)"
+    frontend-http:
+      rule: "Host(`locsnap.saltybots.com`) && PathPrefix(`/`)"
       service: frontend
       entryPoints:
         - web
+      middlewares:
+        - redirect-to-https
 
-    backend:
-      rule: "PathPrefix(`/api`)"
+    backend-http:
+      rule: "Host(`locsnap.saltybots.com`) && PathPrefix(`/api`)"
       service: backend
       entryPoints:
         - web
+      middlewares:
+        - redirect-to-https
 
-    grafana:
-      rule: "PathPrefix(`/grafana`)"
+    grafana-http:
+      rule: "Host(`locsnap.saltybots.com`) && PathPrefix(`/grafana`)"
       service: grafana
       entryPoints:
         - web
+      middlewares:
+        - redirect-to-https
+
+    # HTTPS routers
+    frontend:
+      rule: "Host(`locsnap.saltybots.com`) && PathPrefix(`/`)"
+      service: frontend
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+
+    backend:
+      rule: "Host(`locsnap.saltybots.com`) && PathPrefix(`/api`)"
+      service: backend
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
+
+    grafana:
+      rule: "Host(`locsnap.saltybots.com`) && PathPrefix(`/grafana`)"
+      service: grafana
+      entryPoints:
+        - websecure
+      tls:
+        certResolver: letsencrypt
 
   services:
     frontend:

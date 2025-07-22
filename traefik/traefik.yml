@@ -1,10 +1,20 @@
 entryPoints:
   web:
     address: ":80"
+  websecure:
+    address: ":443"
 
 api:
   dashboard: true
   insecure: true
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: denis@er.codes
+      storage: /letsencrypt/acme.json
+      httpChallenge:
+        entryPoint: web
 
 providers:
   file:
