@@ -23,7 +23,7 @@ http:
         - redirect-to-https
 
     grafana-http:
-      rule: "Host(`locsnap.saltybots.com`) && PathPrefix(`/grafana`)"
+      rule: "Host(`monitoring.locsnap.saltybots.com`) && PathPrefix(`/`)"
       service: grafana
       entryPoints:
         - web
@@ -48,7 +48,7 @@ http:
         certResolver: letsencrypt
 
     grafana:
-      rule: "Host(`locsnap.saltybots.com`) && PathPrefix(`/grafana`)"
+      rule: "Host(`monitoring.locsnap.saltybots.com`) && PathPrefix(`/`)"
       service: grafana
       entryPoints:
         - websecure
