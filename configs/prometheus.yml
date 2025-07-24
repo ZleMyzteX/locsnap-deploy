@@ -1,9 +1,9 @@
 global:
   scrape_interval: 5s
 scrape_configs:
-  - job_name: "loc-snap-spring"
+  - job_name: "locsnap-spring"
     metrics_path: "/actuator/prometheus"
     static_configs:
-      - targets: ["localhost:8080"]
+      - targets: ["locsnap-backend:8080"]
         labels:
-          application: "loc-snap"
+          application: "locsnap"
